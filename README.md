@@ -178,7 +178,6 @@ toggle:OnChanged(function(Value)
 
     -- Desativa a chave na interface ao finalizar a sequência por completo
     toggle:Set(false)
-end,
-})
+end)
 
-local Label = MainTab:CreateLabel("Make sure you are using the Pow Glove and have low ping.", "rewind")
+local Label = Maintab:CreateLabel("Make sure you are using the Pow Glove and have low ping.", "rewind")
