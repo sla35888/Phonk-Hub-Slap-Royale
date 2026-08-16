@@ -7,7 +7,7 @@ local window = Rayfield:CreateWindow({
 
 local Maintab = window:CreateTab({ name = "Main", icon = 93364949241311 })
 
-local toggle = Maintab:CreateToggle({ name = "Damage all on bus" })
+local toggle = Maintab:CreateToggle({ name = "Damage all on bus (DO NOT TAKE ANY ACTION AND MAKE SURE YOU HAVE POW EQUIPPED AND LOW PING!)" })
 
 local hasBeenUsed = false
 
@@ -180,4 +180,49 @@ toggle:OnChanged(function(Value)
     toggle:Set(false)
 end)
 
-local Label = Maintab:CreateLabel("Make sure you are using the Pow Glove and have low ping.", "rewind")
+-- Variável para controlar a execução contínua da Slap Aura
+local slapAuraEnabled = false
+
+local slapAuraToggle = Maintab:CreateToggle({ name = "Slap Aura (KEEP YOUR GLOVES EQUIPPED OR YOU'LL BE KICKED OUT BY THE ANTI-CHEAT SYSTEM!)" })
+
+slapAuraToggle:OnChanged(function(Value)
+    slapAuraEnabled = Value
+
+    if slapAuraEnabled then
+        task.spawn(function()
+            local Players = game:GetService("Players")
+            local ReplicatedStorage = game:GetService("ReplicatedStorage")
+            local LocalPlayer = Players.LocalPlayer
+
+            while slapAuraEnabled do
+                local char = LocalPlayer.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+                if hrp then
+                    local slapRemote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("Slap")
+                    
+                    if slapRemote then
+                        for _, targetPlayer in pairs(Players:GetPlayers()) do
+                            if targetPlayer ~= LocalPlayer and targetPlayer.Character then
+                                local targetHrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+                                local targetHumanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
+
+                                -- Verifica se o jogador está vivo e a uma distância de até 15 studs
+                                if targetHrp and targetHumanoid and targetHumanoid.Health > 0 then
+                                    local distance = (hrp.Position - targetHrp.Position).Magnitude
+                                    if distance <= 15 then
+                                        -- Dispara o RemoteEvent enviando o nome do jogador próximo
+                                        slapRemote:FireServer(targetPlayer.Name)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+
+                -- Cooldown alterado para 1s entre as verificações/disparos
+                task.wait(1)
+            end
+        end)
+    end
+end)
